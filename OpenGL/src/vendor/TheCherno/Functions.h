@@ -1,7 +1,7 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "structs.h"
+#include "../../structs.h"
 #include <fstream>
 #include <sstream>
 

@@ -1,22 +1,23 @@
 #include <string>
-#include "Functions.h"
+#include "vendor/TheCherno/Functions.h"
+#include "vendor/stb_image/stb_image.h"
 
 int main(void)
 {
     GLFWwindow* window;
-    int height = 1920;
-    int width = 1080;
+    int height = 1920, width = 1080;
 
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
+    // Setting it to the modern core profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(height, width, "Synthwave Wallpaper App", NULL, NULL);
+    window = glfwCreateWindow(height, width, "Synthrider Wallpaper App", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -56,6 +57,7 @@ int main(void)
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
     GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(background.vertices), background.vertices, GL_STATIC_DRAW));
 
+    //Specifying layout (in) of vertex data
     char vertexBigness = 2;
     GLCall(glVertexAttribPointer(0, vertexBigness, GL_FLOAT, GL_FALSE, sizeof(background.vertices[0]) * vertexBigness, 0));
     GLCall(glEnableVertexAttribArray(0));
@@ -81,9 +83,22 @@ int main(void)
     GLCall(int locationAspectRatio = glGetUniformLocation(shader, "u_AspectRatio"));
     ASSERT(locationAspectRatio != -1);
 
-    
-    float time = .0f, increment = 0.01f;
-    float r = .0f;
+    //Loading texture
+    int t_width, t_height, t_nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("res/textures/galaxy.jpg", &t_width, &t_height, &t_nrChannels, 0);
+    if (data == nullptr) std::cout << "Error while loading image";
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glActiveTexture(0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
+
+    float time = .0f, longerTime = time, increment = 0.01f;
 
 
     /* Loop until the user closes the window */
@@ -93,20 +108,22 @@ int main(void)
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
         //Setting uniforms
-        GLCall(glUniform1f(locationLongerTime, r));
+        GLCall(glUniform1f(locationLongerTime, longerTime));
         GLCall(glUniform1f(locationTime, time));
         GLCall(glUniform2f(locationResolution, height, width));
         GLCall(glUniform1f(locationAspectRatio, height/width));
 
+        glActiveTexture(0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         //Drawing objects
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
+        //Changing time and longerTime over time
         if (time > .1f) time = .0f;
         time += increment;
-
-        //Changing r
-        if (r > 100.f) r = .0f;
-        r += increment;
+        if (longerTime > 100.f) longerTime = .0f;
+        longerTime += increment;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
