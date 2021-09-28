@@ -7,16 +7,15 @@ int main(void)
     GLFWwindow* window;
     int height = 1920, width = 1080;
 
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
+    //Initialize the library
+    if (!glfwInit()) return -1;
 
-    // Setting it to the modern core profile
+    //Setting it to the modern core profile
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    /* Create a windowed mode window and its OpenGL context */
+    //Create a windowed mode window and its OpenGL context
     window = glfwCreateWindow(height, width, "Synthrider Wallpaper App", NULL, NULL);
     if (!window)
     {
@@ -24,11 +23,9 @@ int main(void)
         return -1;
     }
 
-    /* Make the window's context current */
+    //Make the window's context current
     glfwMakeContextCurrent(window);
-
     glfwSwapInterval(1);
-
 
     if (glewInit() != GLEW_OK) std::cout << "Error" << std::endl;
     std::cout << glGetString(GL_VERSION) << std::endl;
@@ -83,28 +80,28 @@ int main(void)
     GLCall(int locationAspectRatio = glGetUniformLocation(shader, "u_AspectRatio"));
     ASSERT(locationAspectRatio != -1);
 
-    //Loading texture
+    //Loading texture file
     int t_width, t_height, t_nrChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load("res/textures/galaxy.jpg", &t_width, &t_height, &t_nrChannels, 0);
     if (data == nullptr) std::cout << "Error while loading image";
+    
+    //Passing texture data to the fragment shader
     unsigned int texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    GLCall(glGenTextures(1, &texture));
+    GLCall(glActiveTexture(0));
+    GLCall(glBindTexture(GL_TEXTURE_2D, texture));
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t_width, t_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     stbi_image_free(data);
 
     float time = .0f, longerTime = time, increment = 0.01f;
 
-
-    /* Loop until the user closes the window */
+    //Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
         GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
         //Setting uniforms
@@ -113,22 +110,18 @@ int main(void)
         GLCall(glUniform2f(locationResolution, height, width));
         GLCall(glUniform1f(locationAspectRatio, height/width));
 
-        glActiveTexture(0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        //Drawing objects
+        //Binding texture and drawing objects
+        GLCall(glActiveTexture(0));
+        GLCall(glBindTexture(GL_TEXTURE_2D, texture));
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         //Changing time and longerTime over time
         if (time > .1f) time = .0f;
-        time += increment;
         if (longerTime > 100.f) longerTime = .0f;
+        time += increment;
         longerTime += increment;
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
     GLCall(glDeleteProgram(shader));

@@ -62,14 +62,18 @@ void main() {
     vec4 color = vec4(0);
     color += terrain();
 
+    //Positions
+    vec2 leftCenterJoint = vec2(-.1, -.6);
+    vec2 rightCenterJoint = vec2(.1, -.6);
+
     //Road borders
-    color = mix(color, lineColor, finiteLine(center_uv, vec2(-1.8, -1), vec2(-.1, -.6)));
-    color = mix(color, lineColor, finiteLine(center_uv, vec2(-1.5, -1), vec2(-.1, -.6)));
-    color = mix(color, lineColor, finiteLine(center_uv, vec2(1.8, -1), vec2(.1, -.6)));
-    color = mix(color, lineColor, finiteLine(center_uv, vec2(1.5, -1), vec2(.1, -.6)));
+    color = mix(color, lineColor, finiteLine(center_uv, vec2(-1.8, -1), leftCenterJoint));
+    color = mix(color, lineColor, finiteLine(center_uv, vec2(-1.5, -1), leftCenterJoint));
+    color = mix(color, lineColor, finiteLine(center_uv, vec2(1.8, -1), rightCenterJoint));
+    color = mix(color, lineColor, finiteLine(center_uv, vec2(1.5, -1), rightCenterJoint));
 
     ////Road end
-    color = mix(color, lineColor, finiteLine(center_uv, vec2(.1, -.6), vec2(-.1, -.6)));
+    color = mix(color, lineColor, finiteLine(center_uv, rightCenterJoint, leftCenterJoint));
 
     ////Road
     color = mix(color, lineColor, finiteLine(center_uv, vec2(.0, -.6 - u_Time), vec2(.0, -.65 - u_Time)));
