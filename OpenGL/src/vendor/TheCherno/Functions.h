@@ -16,7 +16,6 @@
 
 void GLClearError();
 bool GLLogCall(const char* function, const char* file, int line);
-struct ShaderProgramSource;
-ShaderProgramSource ParseShader(const std::string& filepath);
+std::string ReadFile(const std::string& filepath);
 unsigned int CompileShader(const std::string& source, unsigned int type);
 unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);

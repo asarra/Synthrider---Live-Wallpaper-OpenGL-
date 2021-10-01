@@ -5,7 +5,7 @@
 int main(void)
 {
     GLFWwindow* window;
-    int height = 1920, width = 1080;
+    int height = 1600, width = 900;
 
     //Initialize the library
     if (!glfwInit()) return -1;
@@ -66,26 +66,17 @@ int main(void)
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(background.indices), background.indices, GL_STATIC_DRAW));
 
     //Binding Shaders
-    ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+    std::string vertexSource = ReadFile("res/shaders/base.vert");
+    std::string fragmentSource = ReadFile("res/shaders/base.frag");
+    unsigned int shader = CreateShader(vertexSource, fragmentSource);
     GLCall(glUseProgram(shader));
-
-    //Checking if uniforms exist in shader code
-    GLCall(int locationLongerTime = glGetUniformLocation(shader, "u_LongerTime"));
-    ASSERT(locationLongerTime != -1);
-    GLCall(int locationTime = glGetUniformLocation(shader, "u_Time"));
-    ASSERT(locationTime != -1);
-    GLCall(int locationResolution = glGetUniformLocation(shader, "u_Resolution"));
-    ASSERT(locationResolution != -1);
-    GLCall(int locationAspectRatio = glGetUniformLocation(shader, "u_AspectRatio"));
-    ASSERT(locationAspectRatio != -1);
 
     //Loading texture file
     int t_width, t_height, t_nrChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load("res/textures/galaxy.jpg", &t_width, &t_height, &t_nrChannels, 0);
     if (data == nullptr) std::cout << "Error while loading image";
-    
+
     //Passing texture data to the fragment shader
     unsigned int texture;
     GLCall(glGenTextures(1, &texture));
@@ -97,7 +88,18 @@ int main(void)
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     stbi_image_free(data);
 
-    float time = .0f, longerTime = time, increment = 0.01f;
+    //Checking if uniforms exist in shader code
+    GLCall(int locationLongerTime = glGetUniformLocation(shader, "u_LongerTime"));
+    ASSERT(locationLongerTime != -1);
+    GLCall(int locationTime = glGetUniformLocation(shader, "u_Time"));
+    ASSERT(locationTime != -1);
+    GLCall(int locationResolution = glGetUniformLocation(shader, "u_Resolution"));
+    ASSERT(locationResolution != -1);
+    GLCall(int locationAspectRatio = glGetUniformLocation(shader, "u_AspectRatio"));
+    ASSERT(locationAspectRatio != -1);
+
+
+    float time = .0f, longerTime = time, slowerTime = time, increment = 0.01f;
 
     //Loop until the user closes the window
     while (!glfwWindowShouldClose(window))

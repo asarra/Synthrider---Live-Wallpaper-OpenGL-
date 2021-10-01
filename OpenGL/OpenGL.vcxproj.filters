@@ -29,7 +29,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\Basic.shader" />
+    <None Include="res\shaders\base.vert" />
+    <None Include="res\shaders\base.frag" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vendor\TheCherno\Functions.h">

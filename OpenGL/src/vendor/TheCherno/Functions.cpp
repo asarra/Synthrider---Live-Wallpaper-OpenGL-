@@ -1,6 +1,13 @@
 #include "Functions.h"
 
-//All of these functions belong to "The Cherno"
+std::string ReadFile(const std::string& filepath) {
+    std::ifstream t(filepath);
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    return buffer.str();
+}
+
+//All of the subsequential functions belong to "The Cherno"
 void GLClearError() {
     while (glGetError() != GL_NO_ERROR);
 
@@ -12,34 +19,6 @@ bool GLLogCall(const char* function, const char* file, int line) {
         return false;
     }
     return true;
-}
-
-ShaderProgramSource ParseShader(const std::string& filepath) {
-    std::ifstream stream(filepath);
-
-    enum class ShaderType {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-
-    std::string line;
-    std::stringstream ss[2];
-    ShaderType type = ShaderType::NONE;
-
-    while (getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos) {
-                type = ShaderType::VERTEX;
-            }
-            else if (line.find("fragment") != std::string::npos) {
-                type = ShaderType::FRAGMENT;
-            }
-        }
-        else {
-            ss[(int)type] << line << "\n";
-        }
-
-    }
-    return { ss[0].str(), ss[1].str() };
 }
 
 unsigned int CompileShader(const std::string& source, unsigned int type) {
