@@ -32,16 +32,17 @@ int main(void)
 
     quad background = {
         .vertices={
-            -1.0f, -1.0,    //1
-             1.0f, -1.0f,   //2
-             1.0f,  1.0f,   //3
-            -1.0f,  1.0f,   //4
+            -1.0f, -1.0,    //0
+             1.0f, -1.0f,   //1
+             1.0f,  1.0f,   //2
+            -1.0f,  1.0f,   //3
         },
         .indices={
              0,1,2,
              2,3,0
          }
     };
+
 
     //Creating vertex array
     unsigned int vao;
@@ -97,9 +98,11 @@ int main(void)
     ASSERT(locationResolution != -1);
     GLCall(int locationAspectRatio = glGetUniformLocation(shader, "u_AspectRatio"));
     ASSERT(locationAspectRatio != -1);
+    GLCall(int locationRoadSlidingLinesTime = glGetUniformLocation(shader, "u_RoadSlidingLinesTime"));
+    ASSERT(locationRoadSlidingLinesTime != -1);
 
 
-    float time = .0f, longerTime = time, slowerTime = time, increment = 0.01f;
+    float time = .0f, longerTime = time, slowerTime = time, roadSlidingLinesTime = time, increment = 0.01f;
 
     //Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
@@ -111,7 +114,8 @@ int main(void)
         GLCall(glUniform1f(locationTime, time));
         GLCall(glUniform2f(locationResolution, height, width));
         GLCall(glUniform1f(locationAspectRatio, height/width));
-
+        GLCall(glUniform1f(locationRoadSlidingLinesTime, roadSlidingLinesTime));
+       
         //Binding texture and drawing objects
         GLCall(glActiveTexture(0));
         GLCall(glBindTexture(GL_TEXTURE_2D, texture));
@@ -120,8 +124,10 @@ int main(void)
         //Changing time and longerTime over time
         if (time > .1f) time = .0f;
         if (longerTime > 100.f) longerTime = .0f;
+        if (roadSlidingLinesTime > 1.f) roadSlidingLinesTime = .0f;
         time += increment;
         longerTime += increment;
+        roadSlidingLinesTime += increment;
 
         glfwSwapBuffers(window);
         glfwPollEvents();
