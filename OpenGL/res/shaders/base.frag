@@ -8,6 +8,21 @@ uniform float u_LongerTime;
 uniform float u_RoadSlidingLinesTime;
 out vec4 FragColor;
 
+float signedTriangleArea(vec2 v1, vec2 v2, vec2 v3) {
+    //https://www.shadertoy.com/view/ssjSzW
+    float det = v2.x*v3.y + v3.x*v1.y + v1.x*v2.y - v2.x*v1.y - v1.x*v3.y - v3.x*v2.y;
+    return .5*det;
+}
+
+vec4 roadGlassCanvas(vec2 uv){
+    vec4 col = vec4(0);
+    vec4 A = vec4(0, 0, .3, 1);
+    float a = signedTriangleArea(uv, vec2(1, 0), vec2(.5, .21));
+    float b = signedTriangleArea(uv, vec2(.5, .21), vec2(0));
+    if(a > 0 && b > 0) col = A;
+    return step(uv.y, .2) * col;
+}
+
 vec4 terrain() {
     //heavily modified code from https://www.shadertoy.com/view/4tsGD7
     //Did a lot of optimization and changed it to my "synthwave" taste :)
@@ -51,12 +66,15 @@ void main() {
     vec2 rightCenterJoint = vec2(.1, -.6);
     float bloomThiccness = .001;
 
-    //Let's set a color for the lines, a texture as a background and a synthwave terrain!
+    //Let's set a color for the lines and a synthwave terrain!
     vec4 lineColor = vec4(1, .6, 0, 1);
     vec4 color = vec4(0);
     vec4 bloomyLines = color;
     color += terrain();
+
+    //Let's also add a texture as a background and a road canvas!
     color = mix(color, texture(galaxyTex, texCoord), 1-color.a); //this needs to be run before bloomyLines merges with color!
+    color += roadGlassCanvas(uv);    
     
     //Road borders
     bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(-1.8, -1), leftCenterJoint));
@@ -75,8 +93,6 @@ void main() {
     //Sliding lines
     bloomyLines += lineColor*(bloomThiccness/slidingLine(center_uv, rightCenterJoint, rightCenterJoint, vec2(25.5,1)));
     bloomyLines += lineColor*(bloomThiccness/slidingLine(center_uv, leftCenterJoint, leftCenterJoint, vec2(25.5,1)));
-    
-    //TODO: Road canvas
 
     //let's put it on the screen!
     FragColor = color + bloomyLines;

@@ -124,7 +124,7 @@ int main(void)
         //Changing time and longerTime over time
         if (time > .1f) time = .0f;
         if (longerTime > 100.f) longerTime = .0f;
-        if (roadSlidingLinesTime > 1.f) roadSlidingLinesTime = .0f;
+        if (roadSlidingLinesTime > .65f) roadSlidingLinesTime = .0f;
         time += increment;
         longerTime += increment;
         roadSlidingLinesTime += increment;
