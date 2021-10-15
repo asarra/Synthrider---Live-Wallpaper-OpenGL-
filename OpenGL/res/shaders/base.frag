@@ -18,7 +18,7 @@ vec4 terrain() {
     for (float i = 0; i < 9; i += .01) { //Render distance
         camera += currentFragment * i * .3; //hint: camera = floor(camera) gives voxel (minecraft) terrain
         if (cos(camera.z) + sin(camera.x) > camera.y) { //shapes the terrain into small mountains
-            return vec4(vec3(.1, .02, 0),1) / i;
+            return vec4(vec3(.1, .02, 0) / i, 1);
         }
     }
 }
@@ -46,26 +46,26 @@ void main() {
     vec2 texCoord = vec2(gl_FragCoord.xy) / vec2(textureSize(galaxyTex, 0));
     texCoord.y *= 1.25;
     
-    //Let's set a color for the lines and a synthwave terrain for the canvas!
+    //Positions and bloom thickness
+    vec2 leftCenterJoint = vec2(-.1, -.6);
+    vec2 rightCenterJoint = vec2(.1, -.6);
+    float bloomThiccness = .001;
+
+    //Let's set a color for the lines, a texture as a background and a synthwave terrain!
     vec4 lineColor = vec4(1, .6, 0, 1);
     vec4 color = vec4(0);
     vec4 bloomyLines = color;
     color += terrain();
-
-    //Positions and lots of bloom thicknessess
-    vec2 leftCenterJoint = vec2(-.1, -.6);
-    vec2 rightCenterJoint = vec2(.1, -.6);
-    float bloomThiccness = .003;
-    float doubleBloomThiccness = bloomThiccness*2;
-
+    color = mix(color, texture(galaxyTex, texCoord), 1-color.a); //this needs to be run before bloomyLines merges with color!
+    
     //Road borders
-    bloomyLines += lineColor*(doubleBloomThiccness/finiteLine(center_uv, vec2(-1.8, -1), leftCenterJoint));
-    bloomyLines += lineColor*(doubleBloomThiccness/finiteLine(center_uv, vec2(-1.5, -1), leftCenterJoint));
-    bloomyLines += lineColor*(doubleBloomThiccness/finiteLine(center_uv, vec2(1.8, -1), rightCenterJoint));
-    bloomyLines += lineColor*(doubleBloomThiccness/finiteLine(center_uv, vec2(1.5, -1), rightCenterJoint));
+    bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(-1.8, -1), leftCenterJoint));
+    bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(-1.5, -1), leftCenterJoint));
+    bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(1.8, -1), rightCenterJoint));
+    bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(1.5, -1), rightCenterJoint));
 
     //Road end
-    bloomyLines += lineColor*(bloomThiccness+.007/finiteLine(center_uv, leftCenterJoint, rightCenterJoint));
+    bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, leftCenterJoint, rightCenterJoint));
 
     //Road
     bloomyLines += lineColor*(bloomThiccness/finiteLine(center_uv, vec2(0, -.6 - u_Time), vec2(0, -.65 - u_Time)));
@@ -75,10 +75,9 @@ void main() {
     //Sliding lines
     bloomyLines += lineColor*(bloomThiccness/slidingLine(center_uv, rightCenterJoint, rightCenterJoint, vec2(25.5,1)));
     bloomyLines += lineColor*(bloomThiccness/slidingLine(center_uv, leftCenterJoint, leftCenterJoint, vec2(25.5,1)));
-
-    color += bloomyLines;
-    //TODO: Road canvas and correct alpha order
+    
+    //TODO: Road canvas
 
     //let's put it on the screen!
-    FragColor = mix(color, texture(galaxyTex, texCoord), 1-color.a);
+    FragColor = color + bloomyLines;
 };
