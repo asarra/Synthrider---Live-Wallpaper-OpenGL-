@@ -59,7 +59,7 @@ void main() {
     vec2 uv = gl_FragCoord.xy / u_Resolution;
     vec2 center_uv = (gl_FragCoord.xy * 2 - u_Resolution.xy) / u_Resolution.y;
     vec2 texCoord = vec2(gl_FragCoord.xy) / vec2(textureSize(galaxyTex, 0));
-    texCoord.y *= 1.25;
+    texCoord.y *= 1.25 * step(0, sin(u_LongerTime));
     
     //Positions and bloom thickness
     vec2 leftCenterJoint = vec2(-.1, -.6);
